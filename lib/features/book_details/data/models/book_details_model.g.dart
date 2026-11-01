@@ -13,7 +13,6 @@ BookDetailsModel _$BookDetailsModelFromJson(Map<String, dynamic> json) =>
               ? null
               : BookDetailsData.fromJson(json['data'] as Map<String, dynamic>),
       message: json['message'] as String?,
-
       status: (json['status'] as num?)?.toInt(),
     );
 
@@ -21,7 +20,6 @@ Map<String, dynamic> _$BookDetailsModelToJson(BookDetailsModel instance) =>
     <String, dynamic>{
       'data': instance.data,
       'message': instance.message,
-
       'status': instance.status,
     };
 

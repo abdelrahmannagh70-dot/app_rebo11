@@ -23,6 +23,7 @@
     skeletonizer: ^1.4.3
 
     json_annotation: ^4.9.0
+    flutter_svg: ^2.2.2
 
 
   dev_dependencies:
@@ -32,6 +33,7 @@
     flutter_lints: ^5.0.0
     build_runner: ^2.5.4
     json_serializable: ^6.9.5
+    flutter_gen_runner: 5.13.0+1
 
 
   flutter:
@@ -40,10 +42,17 @@
     assets:
       - assets/translations/
       - assets/images/
+      - assets/icons/
 
     fonts:
       - family: DM
         fonts:
           - asset: assets/fonts/DMSerifDisplay-Italic.ttf
           - asset: assets/fonts/DMSerifDisplay-Regular.ttf
+
+  flutter_gen:
+    output: lib/gen/
+    line_length: 80
+    integrations:
+      flutter_svg: true
 

@@ -30,6 +30,7 @@ The project follows a modular structure to keep the code organized, reusable, an
 
 <p align="center">
   <img src="assets/images/home_screenn.png" width="300" alt="Home Screen">
+<img src="assets/images/silder.png" width="300" >
 </p>
 
 > **Note:** Make sure all screenshot paths match the actual image locations in the repository. GitHub paths are case-sensitive, and filenames containing spaces must match exactly.
@@ -42,6 +43,8 @@ The project follows a modular structure to keep the code organized, reusable, an
 ### Details
  <img src="assets/images/details.png" width="300" >
  <img src="assets/images/details3.png" width="300" alt="details in book">
+<img src="assets/images/nav1.jpg" width="300" >
+<img src="assets/images/nav3.jpg" width="300" >
 
 * Login screen with email and password fields.
 * Registration screen UI.
@@ -205,6 +208,76 @@ The Best Seller request follows this sequence:
 7. If the request fails, `HomeCubit` emits `GetBestSellerError`.
 8. The UI can use these states to display a loading indicator, book data, or an error message.
 
+
+## 🖼️ Home Slider & API Integration
+
+The Home screen also displays banner images retrieved from the Sliders API.
+
+### Sliders API
+
+The application requests the slider data from:
+
+```http
+GET /sliders
+```
+
+The endpoint is configured in `ApiEndPoint`:
+
+```dart
+static const String sliders = 'sliders';
+```
+
+The API response contains a `data.sliders` list. Each item in the list contains an `image` URL. The application uses these URLs to load the banner images from the network.
+
+### Slider Files
+
+The slider feature is separated into the following files:
+
+| File | Responsibility |
+| --- | --- |
+| `slider_model.dart` | Converts the slider JSON response into Dart objects (`SliderModel`, `SliderData`, and `SliderItem`). |
+| `slider_repo.dart` | Sends the request to the Sliders API using the configured Dio instance and returns a `SliderModel`. |
+| `slider_cubit.dart` | Requests slider data from the repository and emits the appropriate state. |
+| `slider_state.dart` | Defines the initial, loading, success, and error states for the slider request. |
+| `home_slider.dart` | Displays the banner images and page indicators in the Home screen. |
+
+### Slider States
+
+The slider feature uses these states:
+
+| State | Purpose |
+| --- | --- |
+| `SliderInitial` | Initial state before loading starts. |
+| `SliderLoading` | Indicates that slider data is being loaded. |
+| `SliderSuccess` | Contains the list of slider images returned by the API. |
+| `SliderError` | Indicates that the request failed. |
+
+### Slider UI
+
+`HomeSlider` uses `BlocBuilder<SliderCubit, SliderState>` to rebuild the slider when its state changes.
+
+- A loading indicator is displayed while the request is in progress.
+- The banner images are displayed using `Image.network`.
+- `PageView.builder` allows users to swipe between the images.
+- Page indicators show which banner is currently selected.
+- An error message is displayed if the slider request fails.
+
+### Slider Request Flow
+
+1. `AppRouter` creates a `SliderCubit` when the Home screen is opened.
+2. `SliderCubit.getSliders()` starts the request and emits `SliderLoading`.
+3. `SliderCubit` calls `SliderRepo.getSliders()`.
+4. `SliderRepo` sends a GET request to the `/sliders` endpoint using Dio.
+5. `SliderModel.fromJson()` converts the JSON response into Dart objects.
+6. `SliderCubit` emits `SliderSuccess` with the slider list, or `SliderError` if the request fails.
+7. `HomeSlider` receives the state through `BlocBuilder` and displays the images.
+
+### Providing Both Home Cubits
+
+The Home screen needs two independent Cubits: `HomeCubit` for Best Seller books and `SliderCubit` for banner images. `MultiBlocProvider` makes both available to the same screen.
+
+This keeps book loading and slider loading independent. A problem with one request does not require changing the state-management logic of the other feature.
+
 ## 🔄 State Management
 
 The application uses **Cubit** from the `flutter_bloc` package to manage application states.
@@ -227,7 +300,14 @@ The Best Seller feature uses:
 * `GetBestSellerSuccess`
 * `GetBestSellerError`
 
-Using separate Cubits and states helps keep authentication logic independent from book-related operations.
+The Home slider feature uses:
+
+* `SliderInitial`
+* `SliderLoading`
+* `SliderSuccess`
+* `SliderError`
+
+Using separate Cubits and states keeps authentication, book loading, and slider loading independent from one another.
 
 ## 🌐 API Integration
 
@@ -237,8 +317,8 @@ The networking and data flow are organized into separate responsibilities:
 
 * **ApiEndPoint:** Stores the base URL and endpoint paths.
 * **Repository:** Handles data-fetching operations.
-* **Model:** Represents the response data.
-* **Cubit:** Manages loading, success, and error states.
+* **Model:** Represents the response data, including book and slider data.
+* **Cubit:** Manages loading, success, and error states for each feature.
 * **UI:** Displays the appropriate content based on the current state.
 
 This separation makes the application easier to understand, test, and maintain.
@@ -314,6 +394,16 @@ app3/
 │   │   │           ├── auth_repo.dart
 │   │   │           └── home-repo.dart
 │   │   │
+│   │   └── welcome/
+│   │       └── presentaion/
+│   │           └── silder/
+│   │               ├── slider_model.dart
+│   │               ├── slider_repo.dart
+│   │               ├── slider_cubit.dart
+│   │               ├── slider_state.dart
+│   │               └── widgets/
+│   │                   └── home_slider.dart
+│   │
 │   │   └── presentaion/
 │   │       ├── cubit/
 │   │       │   ├── auth_cubit.dart
